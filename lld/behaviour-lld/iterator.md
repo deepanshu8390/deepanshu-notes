@@ -6,6 +6,63 @@
 
 ---
 
+> ## Java Quick Note — `.contains()`
+>
+> `contains()` ka simple meaning hai: **"kya ye value andar present hai?"**
+>
+> ### String
+>
+> ```java
+> String song = "Song 2 Fav";
+>
+> song.contains("Fav"); // true
+> ```
+>
+> Yahan String ke andar `"Fav"` text search ho raha hai.
+>
+> ### ArrayList
+>
+> ```java
+> ArrayList<String> songs = new ArrayList<>();
+>
+> songs.add("A");
+> songs.add("B");
+> songs.add("C");
+>
+> if (songs.contains("A")) {
+>     System.out.println("A is present");
+> }
+> ```
+>
+> Yahan check ho raha hai ki **`"A"` list ke elements mein present hai ya nahi**.
+>
+> ### Time Complexity
+>
+> ```text
+> ArrayList.contains(value) → O(n) worst case
+> ```
+>
+> Reason: ArrayList mein value search ke liye elements ko one-by-one compare karna pad sakta hai.
+>
+> ```text
+> [A B C D E]
+>  ↓ ↓ ↓ ↓ ↓
+>  search until value is found
+> ```
+>
+> Best case mein first element mil jaye toh `O(1)`.
+>
+> Useful comparison:
+>
+> ```text
+> ArrayList.contains(x) → O(n)
+> HashSet.contains(x)   → O(1) average
+> ```
+>
+> **Same `.contains()` naam hone ke baad bhi underlying data structure complexity change kar deta hai.**
+>
+> ---
+
 # 1. Problem Statement
 
 Suppose we have a `Playlist` containing songs:

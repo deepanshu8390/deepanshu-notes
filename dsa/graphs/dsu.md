@@ -584,6 +584,84 @@ But DSU mein `n` known hone ki wajah se `int[]` simpler hai.
 
 ---
 
+# ⏱️ Time & Space Complexity — Current Version
+
+**Current version = Union by Size + simple recursive Find. Path Compression abhi nahi hai.**
+
+Union by Size tree ki height ko `O(log N)` tak control karta hai.
+
+### `find(x)`
+
+Worst-case tree height:
+
+```text
+O(log N)
+```
+
+So:
+
+```text
+Time  = O(log N)
+Stack = O(log N)
+```
+
+### `union(a, b)`
+
+Union ke andar do `find()` calls hote hain:
+
+```text
+find(a) → O(log N)
+find(b) → O(log N)
+size compare + pointer change → O(1)
+```
+
+So overall:
+
+```text
+Time = O(log N)
+```
+
+### Space
+
+```text
+parent[] = O(N)
+size[]   = O(N)
+recursion stack = O(log N)
+```
+
+So auxiliary data structure space:
+
+```text
+O(N)
+```
+
+### ⚠️ Without Union by Size
+
+Agar random merging se chain ban gayi:
+
+```text
+1
+↑
+2
+↑
+3
+↑
+...
+↑
+N
+```
+
+Then:
+
+```text
+find = O(N)
+recursion stack = O(N)
+```
+
+**Union by Size ne isi problem ko `O(N)` se `O(log N)` tak improve kiya.**
+
+---
+
 # ⚠️ Current State — Abhi kya nahi padha
 
 Abhi humne **path compression nahi lagaya**.

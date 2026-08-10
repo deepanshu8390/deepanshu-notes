@@ -93,100 +93,255 @@ Queue bas **ready nodes ki waiting line** hai.
 
 ---
 
-## ⚠️ Important: DFS mein indegree nahi
+# DFS — Same Topological Sort, Different Thinking
 
-Yahan Kahn aur DFS ko mix mat karna.
+## ⚠️ DFS mein indegree kyun nahi?
 
-### Kahn / BFS
-
-```text
-source → indegree 0
-      → process
-      → indegree reduce
-      → new source
-```
-
-### DFS
-
-DFS mein hume dependency count maintain karne ki zarurat nahi.
-
-Recursion stack khud ek natural order deta hai:
-
-> **Pehle neighbours ko complete karo, phir current node ko answer mein daalo.**
-
-Example 1:
-
-```text
-A → B → C
-```
-
-DFS flow:
-
-```text
-A
- ↓
-B
- ↓
-C → answer
-  B → answer
-    A → answer
-```
-
-Answer initially:
-
-```text
-C B A
-```
-
-Reverse karne par:
-
-```text
-A B C
-```
-
-Example 2:
-
-```text
-A → C
-B → C
-```
-
-DFS `C` ko dono parents se pehle complete karega. Agar traversal A se start hua:
-
-```text
-A → C → answer
-B → answer
-```
-
-Temporary answer:
-
-```text
-C A B
-```
-
-Reverse:
-
-```text
-B A C
-```
-
-Ye valid topological order hai.
-
-### 🔥 Why no indegree in DFS?
-
-Kahn ka question hai:
+Kahn ka question:
 
 > **Kaun abhi ready hai?**
 
 Isliye indegree maintain karte hain.
 
-DFS ka question hai:
+DFS ka question:
 
-> **Is node ke saare dependent/next nodes complete hue ya nahi?**
+> **Current node se aage jo nodes hain, kya unko pehle complete kar sakte hain?**
 
-Recursion naturally hume ye order deta hai. Node ko **return/backtrack ke time** answer mein daalte hain.
+DFS mein recursion stack already ye order naturally maintain karta hai.
 
-So DFS ko Kahn ka `indegree--` mechanism nahi chahiye.
+```text
+current
+   ↓
+neighbour
+   ↓
+next neighbour
+   ↓
+...
+   ↓
+return / backtrack
+   ↓
+current ko answer mein daalo
+```
+
+Isliye DFS ko `indegree--` karne ki zarurat nahi.
+
+### 🔥 One-line difference
+
+```text
+Kahn → ready node dhoondo
+DFS  → node ko complete karke answer mein daalo
+```
+
+---
+
+## 🔄 DFS Dry Run 1 — Simple Chain
+
+Graph:
+
+```text
+A → B → C
+```
+
+Call:
+
+```text
+DFS(A)
+   ↓
+ DFS(B)
+   ↓
+  DFS(C)
+```
+
+C ke neighbours nahi hain, so:
+
+```text
+C → answer
+```
+
+Return to B:
+
+```text
+B → answer
+```
+
+Return to A:
+
+```text
+A → answer
+```
+
+Temporary answer:
+
+```text
+C B A
+```
+
+Finally reverse:
+
+```text
+A B C
+```
+
+---
+
+## 🔄 DFS Dry Run 2 — Branching
+
+Graph:
+
+```text
+      A
+     / \
+    B   C
+     \ /
+      D
+```
+
+Edges:
+
+```text
+A → B
+A → C
+B → D
+C → D
+```
+
+Suppose DFS starts from A and visits B first:
+
+```text
+A
+↓
+B
+↓
+D → answer
+```
+
+Return to B:
+
+```text
+B → answer
+```
+
+Back to A, now C:
+
+```text
+A
+ \
+  C
+  ↓
+  D already visited
+```
+
+C complete:
+
+```text
+C → answer
+```
+
+Finally A:
+
+```text
+A → answer
+```
+
+Temporary answer:
+
+```text
+D B C A
+```
+
+Reverse:
+
+```text
+A C B D
+```
+
+Valid topological order.
+
+**Important:** `D` pehle answer mein aaya because DFS ne usko complete kiya; reverse ke baad D dependency ke baad aata hai.
+
+---
+
+## 🔄 DFS Dry Run 3 — Multiple Components
+
+Graph:
+
+```text
+A → B
+
+C → D
+```
+
+Pehle DFS(A):
+
+```text
+A → B
+B → answer
+A → answer
+```
+
+Answer:
+
+```text
+B A
+```
+
+Phir DFS(C):
+
+```text
+C → D
+D → answer
+C → answer
+```
+
+Answer:
+
+```text
+B A D C
+```
+
+Reverse:
+
+```text
+C D A B
+```
+
+Ye bhi valid hai because dono components independent hain.
+
+---
+
+## 🧠 Why DFS mein stack space?
+
+DFS recursion use kar raha hai, so calls stack mein store hoti hain.
+
+Example:
+
+```text
+A → B → C → D
+```
+
+Deepest moment par recursion stack:
+
+```text
+DFS(A)
+DFS(B)
+DFS(C)
+DFS(D)
+```
+
+Maximum depth `V` tak ja sakti hai.
+
+So **DFS recursion stack = O(V)** in worst case.
+
+> Sirf recursion stack ki baat kar rahe ho toh stack space `O(V)` hai.
+> Overall implementation mein `visited` bhi `O(V)` hota hai, aur answer `O(V)` output space leta hai.
+
+Time:
+
+```text
+O(V + E)
+```
+
+because har node aur edge traversal mein consider hota hai.
 
 ---
 
@@ -341,3 +496,4 @@ ArrayList<Integer> topoSort(int V, ArrayList<ArrayList<Integer>> adj) {
 - DFS = recursion stack; neighbours first, current node later.
 - DFS does **not** need indegree.
 - DFS answer is built in reverse order, so reverse it at the end.
+- DFS recursion stack = `O(V)` worst case; overall auxiliary space also includes `visited`.

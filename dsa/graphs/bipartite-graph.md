@@ -6,12 +6,7 @@ Bipartite graph ko simple way mein aise socho:
 
 > Graph ke nodes ko 2 groups / colors mein divide karna hai, aur har edge ke dono ends different groups mein hone chahiye.
 
-Hum usually 2 colors use karte hain:
-
-- Color `0`
-- Color `1`
-
-Actual number `1` aur `2` important nahi hai. Bas **2 different states** chahiye.
+Hum 2 colors use kar sakte hain. Colors ki actual value important nahi hai — bas 2 different states chahiye.
 
 ---
 
@@ -23,40 +18,86 @@ Correct approach:
 
 > Current node ka color jo hai, neighbor ko uska **opposite color** do.
 
+### Agar colors `1` aur `2` hain
+
 Agar:
 
 ```text
-current = 0
-neighbor = 1
+current = 1
 ```
 
-to next:
+to opposite:
 
 ```text
-current = 1
-neighbor = 0
+2
 ```
 
-Runtime par transition automatically ho sakta hai:
+Aur agar:
+
+```text
+current = 2
+```
+
+to opposite:
+
+```text
+1
+```
+
+Isko runtime par automatically karne ka simple trick:
+
+```text
+opposite = 3 - currentColor
+```
+
+Because:
+
+```text
+3 - 1 = 2
+3 - 2 = 1
+```
+
+So `1 -> 2` aur `2 -> 1` automatically ho jayega.
+
+### C++
 
 ```cpp
-color[v] = 1 - color[u];
+color[v] = 3 - color[u];
 ```
 
-Java mein bhi same logic:
+### Java
 
 ```java
-color[v] = 1 - color[u];
+color[v] = 3 - color[u];
 ```
 
-Isliye `1` aur `2` ko hardcode karke:
+---
+
+## 🔄 Alternative — Colors `0` and `1`
+
+Agar hum colors `0` aur `1` use karte hain, to opposite color ka formula hoga:
 
 ```text
-1 -> 2
-2 -> 1
+opposite = 1 - currentColor
 ```
 
-likhne ki zarurat nahi.
+Because:
+
+```text
+1 - 0 = 1
+1 - 1 = 0
+```
+
+So dono approaches same concept represent karti hain:
+
+```text
+Colors 1,2  ->  3 - currentColor
+Colors 0,1  ->  1 - currentColor
+```
+
+### 💡 Important
+
+Formula color numbering par depend karta hai. **Concept hamesha same hai: neighbor ko opposite color do.**
 
 ---
 
@@ -88,21 +129,25 @@ mil gaya, graph bipartite nahi hai.
 
 Uncolored node se start karo.
 
+Agar colors `1` aur `2` hain:
+
 ```text
-color[start] = 0
+color[start] = 1
 ```
 
-Phir uske neighbors:
+Phir uske neighbor ko:
 
 ```text
-color[neighbor] = 1 - color[current]
+color[neighbor] = 3 - color[current]
 ```
 
-Phir next level par:
+do.
+
+Example:
 
 ```text
-1 -> 0
-0 -> 1
+current = 1  -> neighbor = 2
+current = 2  -> neighbor = 1
 ```
 
 So graph mein coloring automatically alternate hoti rahegi.
@@ -128,27 +173,29 @@ Ye logically kaam kar sakta hai, but unnecessary hardcoding hai.
 
 Color ko **state** samjho, actual value nahi.
 
+Agar colors `1` and `2` hain:
+
 ```text
-opposite = 1 - current
+opposite = 3 - currentColor
 ```
 
-Ye cleaner hai aur code mein actual concept clearly dikhta hai:
+Ye cleaner hai aur runtime par automatically `1 -> 2` aur `2 -> 1` handle karta hai.
 
-> Neighbor ko current ka opposite color do.
+Agar colors `0` and `1` hain:
+
+```text
+opposite = 1 - currentColor
+```
 
 ---
 
-## 🧩 C++ Core Pattern
+## 🧩 C++ Core Pattern — Colors `1` and `2`
 
 ```cpp
-color[v] = 1 - color[u];
-```
+color[start] = 1;
 
-BFS/DFS mein jab `v` uncolored ho:
-
-```cpp
 if (color[v] == -1) {
-    color[v] = 1 - color[u];
+    color[v] = 3 - color[u];
 }
 else if (color[v] == color[u]) {
     return false;
@@ -163,21 +210,19 @@ abhi color assign nahi hua
 
 ---
 
-## ☕ Java Core Pattern
+## ☕ Java Core Pattern — Colors `1` and `2`
 
 ```java
-color[v] = 1 - color[u];
-```
+color[start] = 1;
 
-Same idea. Language change hui hai, algorithm nahi.
-
-```java
 if (color[v] == -1) {
-    color[v] = 1 - color[u];
+    color[v] = 3 - color[u];
 } else if (color[v] == color[u]) {
     return false;
 }
 ```
+
+Same idea. Language change hui hai, algorithm nahi.
 
 ---
 
@@ -209,14 +254,19 @@ neighbor = opposite color
 ```text
 Bipartite = 2-colorable graph
 
-Start node -> color 0
-Neighbor   -> 1 - currentColor
+Colors 1,2:
+    Start node -> color 1
+    Neighbor   -> 3 - currentColor
+
+Colors 0,1:
+    Start node -> color 0
+    Neighbor   -> 1 - currentColor
 
 Already colored neighbor:
     same color  -> NOT bipartite
     different   -> continue
 ```
 
-### One-line trick
+### 🔥 One-line trick
 
-> **Color number yaad mat rakho; bas opposite color do.**
+> **Color number yaad mat rakho; bas opposite color do. 1/2 ke liye `3 - currentColor`, 0/1 ke liye `1 - currentColor`.**

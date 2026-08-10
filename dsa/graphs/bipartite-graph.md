@@ -1,53 +1,41 @@
 # Bipartite Graph
 
-## 🧠 Core Intuition
+## 🧠 Basic Intuition — problem tak kaise pahuche
 
-Bipartite graph ko simple way mein aise socho:
+Bipartite ka simple meaning:
 
-> Graph ke nodes ko 2 groups / colors mein divide karna hai, aur har edge ke dono ends different groups mein hone chahiye.
+> Graph ke nodes ko **2 groups / colors** mein divide karna hai, aur har connected pair different group mein hona chahiye.
 
-Hum 2 colors use kar sakte hain. Colors ki actual value important nahi hai — bas 2 different states chahiye.
+To naturally hum sochte hain:
+
+```text
+2 groups
+   ↓
+2 colors
+   ↓
+Current node ko ek color
+Neighbor ko opposite color
+```
+
+Bas isi se BFS/DFS coloring approach aa jaati hai.
 
 ---
 
-## 🔥 Main Logic — Runtime Par Color Change
+## 🔥 Key Logic / Observation
 
-Meri initial mistake thi ki `1` aur `2` ko hardcode karke manually change kar raha tha.
-
-Correct approach:
-
-> Current node ka color jo hai, neighbor ko uska **opposite color** do.
-
-### Agar colors `1` aur `2` hain
-
-Agar:
+Agar colors `1` aur `2` use kar rahe hain:
 
 ```text
-current = 1
+1 → 2
+2 → 1
 ```
 
-to opposite:
+Isko hardcode karne ki zarurat nahi.
 
-```text
-2
-```
+Runtime par:
 
-Aur agar:
-
-```text
-current = 2
-```
-
-to opposite:
-
-```text
-1
-```
-
-Isko runtime par automatically karne ka simple trick:
-
-```text
-opposite = 3 - currentColor
+```cpp
+nextColor = 3 - currentColor;
 ```
 
 Because:
@@ -57,216 +45,74 @@ Because:
 3 - 2 = 1
 ```
 
-So `1 -> 2` aur `2 -> 1` automatically ho jayega.
-
-### C++
+Agar colors `0` aur `1` ho, then:
 
 ```cpp
-color[v] = 3 - color[u];
+nextColor = 1 - currentColor;
 ```
 
-### Java
+### Main condition
 
-```java
-color[v] = 3 - color[u];
-```
-
----
-
-## 🔄 Alternative — Colors `0` and `1`
-
-Agar hum colors `0` aur `1` use karte hain, to opposite color ka formula hoga:
-
-```text
-opposite = 1 - currentColor
-```
-
-Because:
-
-```text
-1 - 0 = 1
-1 - 1 = 0
-```
-
-So dono approaches same concept represent karti hain:
-
-```text
-Colors 1,2  ->  3 - currentColor
-Colors 0,1  ->  1 - currentColor
-```
-
-### 💡 Important
-
-Formula color numbering par depend karta hai. **Concept hamesha same hai: neighbor ko opposite color do.**
-
----
-
-## 💡 Important Observation
-
-Bipartite check ka actual question hai:
-
-> Kya graph ko 2 colors se aise color kar sakte hain ki har edge ke endpoints different colors ke hon?
-
-Isliye har edge `(u, v)` ke liye:
+Har edge ke liye:
 
 ```text
 color[u] != color[v]
 ```
 
-hona chahiye.
-
-Agar kisi already-colored neighbor ke liye:
-
-```text
-color[u] == color[v]
-```
-
-mil gaya, graph bipartite nahi hai.
+Agar already-colored neighbor ka color same mil gaya → **not bipartite**.
 
 ---
 
-## 🔄 BFS / DFS Coloring Pattern
+## ⚠️ My Coding Mistake
 
-Uncolored node se start karo.
-
-Agar colors `1` aur `2` hain:
+Maine `1` aur `2` ko hardcode karke transition likh diya tha:
 
 ```text
-color[start] = 1
+1 → 2
+2 → 1
 ```
 
-Phir uske neighbor ko:
+Problem ye nahi tha ki answer galat aa raha tha; problem ye thi ki main **color ko actual value samajh raha tha**.
 
-```text
-color[neighbor] = 3 - color[current]
-```
+Color bas ek **state** hai.
 
-do.
+Better mental model:
 
-Example:
+> Current color jo bhi hai, neighbor ko uska opposite color do.
 
-```text
-current = 1  -> neighbor = 2
-current = 2  -> neighbor = 1
-```
-
-So graph mein coloring automatically alternate hoti rahegi.
-
----
-
-## ⚠️ My Mistake
-
-### Wrong thinking
-
-Maine colors ko directly hardcode kar diya:
-
-```text
-if current == 1:
-    neighbor = 2
-else:
-    neighbor = 1
-```
-
-Ye logically kaam kar sakta hai, but unnecessary hardcoding hai.
-
-### Better thinking
-
-Color ko **state** samjho, actual value nahi.
-
-Agar colors `1` and `2` hain:
-
-```text
-opposite = 3 - currentColor
-```
-
-Ye cleaner hai aur runtime par automatically `1 -> 2` aur `2 -> 1` handle karta hai.
-
-Agar colors `0` and `1` hain:
-
-```text
-opposite = 1 - currentColor
-```
-
----
-
-## 🧩 C++ Core Pattern — Colors `1` and `2`
+Isliye runtime calculation:
 
 ```cpp
-color[start] = 1;
-
-if (color[v] == -1) {
-    color[v] = 3 - color[u];
-}
-else if (color[v] == color[u]) {
-    return false;
-}
-```
-
-`-1` ka meaning:
-
-```text
-abhi color assign nahi hua
+3 - currentColor
 ```
 
 ---
 
-## ☕ Java Core Pattern — Colors `1` and `2`
+## 🔁 BFS / DFS — Bas Pattern Yaad Rakho
 
-```java
-color[start] = 1;
+Dono mein core logic same hai:
 
-if (color[v] == -1) {
-    color[v] = 3 - color[u];
-} else if (color[v] == color[u]) {
-    return false;
-}
+```text
+uncolored node
+      ↓
+assign a color
+      ↓
+visit neighbours
+      ↓
+uncolored → opposite color
+already colored → check different?
 ```
 
-Same idea. Language change hui hai, algorithm nahi.
+BFS ya DFS sirf **traversal ka method** change karta hai; bipartite ka coloring logic same rehta hai.
 
 ---
 
-## 🎯 Interview Recognition
+## 💡 Things to Revise
 
-Agar question mein aaye:
-
-- 2 groups mein divide karo
-- 2 colors mein color karo
-- Adjacent nodes different hone chahiye
-- No two connected nodes same group mein
-
-Immediately think:
-
-```text
-Bipartite Graph
-        ↓
-2-coloring
-        ↓
-BFS / DFS
-        ↓
-neighbor = opposite color
-```
-
----
-
-## 📝 Quick Revision
-
-```text
-Bipartite = 2-colorable graph
-
-Colors 1,2:
-    Start node -> color 1
-    Neighbor   -> 3 - currentColor
-
-Colors 0,1:
-    Start node -> color 0
-    Neighbor   -> 1 - currentColor
-
-Already colored neighbor:
-    same color  -> NOT bipartite
-    different   -> continue
-```
-
-### 🔥 One-line trick
-
-> **Color number yaad mat rakho; bas opposite color do. 1/2 ke liye `3 - currentColor`, 0/1 ke liye `1 - currentColor`.**
+- Bipartite = **2-colorable graph**
+- `color[u] != color[v]`
+- Neighbor ko **opposite color** dena hai
+- `1,2` colors → `3 - currentColor`
+- `0,1` colors → `1 - currentColor`
+- BFS/DFS dono mein same coloring idea
+- `-1` generally means **abhi color assign nahi hua**

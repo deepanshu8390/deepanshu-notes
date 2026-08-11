@@ -16,7 +16,51 @@ Add the new node
 Repeat until all nodes are connected
 ```
 
-### Prim vs Kruskal
+## 🔥 Why Priority Queue, not a Normal Queue?
+
+Prim keeps **all candidate outgoing edges** from the current tree.
+
+A normal queue gives:
+
+```text
+first inserted → first processed
+```
+
+But Prim needs:
+
+```text
+cheapest candidate edge → first processed
+```
+
+Example:
+
+```text
+Candidates:
+(4, C)
+(7, D)
+(2, C)
+```
+
+A normal queue would give `4` first, even though `2` is better.
+
+We could scan the whole queue every time to find the minimum, but that is inefficient.
+
+A min-heap keeps the minimum candidate at the top:
+
+```text
+heap → (2,C), (4,C), (7,D)
+          ↑
+       selected
+```
+
+So:
+
+> **Queue = insertion order**  
+> **Priority Queue = weight order**
+
+The heap stores **candidate edges, not complete paths**. Multiple possible edges to the same node can exist; once that node is visited, later candidates for it are ignored.
+
+## Prim vs Kruskal
 
 ```text
 Kruskal → edge-centric → global cheapest edge → DSU

@@ -160,7 +160,77 @@ arr.set(0, -1);   // ❌
 
 ---
 
-## 3. Array vs ArrayList — DSA Cheat Sheet
+## 3. Stack, Queue & Deque
+
+### Stack — LIFO
+
+```java
+Stack<Integer> st = new Stack<>();
+```
+
+```java
+st.push(10);      // add
+st.pop();         // remove top
+st.peek();        // see top
+st.isEmpty();
+```
+
+### Queue — FIFO
+
+```java
+Queue<Integer> q = new LinkedList<>();
+```
+
+```java
+q.add(10);        // add
+q.remove();       // remove front
+q.peek();         // see front
+q.isEmpty();
+```
+
+`Queue` is an interface, so we create an object using an implementation such as `LinkedList` or `ArrayDeque`.
+
+### Deque — both ends
+
+```java
+Deque<Integer> dq = new ArrayDeque<>();
+```
+
+```java
+dq.addFirst(10);       // front
+
+dq.addLast(20);        // back
+
+dq.removeFirst();      // front
+
+dq.removeLast();       // back
+
+dq.peekFirst();        // see front
+
+dq.peekLast();         // see back
+```
+
+`ArrayDeque` = Java class implementing `Deque` using an array-based/circular-array approach. Unlike LinkedList, it does not use Node objects.
+
+Mental map:
+
+```text
+Stack → LIFO
+Queue → FIFO
+Deque  → add/remove from both ends
+```
+
+Common syntax:
+
+```java
+Stack<Integer> st = new Stack<>();
+Queue<Integer> q = new LinkedList<>();
+Deque<Integer> dq = new ArrayDeque<>();
+```
+
+---
+
+## 4. Array vs ArrayList — DSA Cheat Sheet
 
 | Task | Array | ArrayList |
 |---|---|---|
@@ -171,7 +241,7 @@ arr.set(0, -1);   // ❌
 | Size | `arr.length` | `arr.size()` |
 | Initialize all `-1` | `Arrays.fill(arr, -1)` | loop + `arr.add(-1)` |
 
-## 4. Mental Shortcut
+## 5. Mental Shortcut
 
 **Array → boxes already created**
 
@@ -212,9 +282,6 @@ becomes:
 ### One-line memory trick
 
 > `[]` = fixed-size array
->
 > `ArrayList<>` = dynamic list / C++ `vector` type
->
 > `add()` = new element
->
 > `set()` = existing element replace

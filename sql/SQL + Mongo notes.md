@@ -405,6 +405,132 @@ MongoDB  → Regex
 
 ---
 
+# SQL — NULL & NOT Operators
+
+## 🚨🚨🚨 DANGER ZONE: `NULL` 🚨🚨🚨
+
+> **Ye SQL ka sabse common silly trap hai.**
+>
+> `NULL` ko `=` se check kiya → **GALAT.**
+>
+> Baar-baar yaad rakh: **`NULL` ke saath `IS NULL` / `IS NOT NULL` use hota hai.**
+
+### `IS NULL`
+
+`NULL` = value missing / unknown.
+
+```sql
+SELECT name
+FROM employees
+WHERE city IS NULL;
+```
+
+Mental model:
+
+> Har row mein `city` check karo → jahan city ki value missing hai, woh row select.
+
+❌ **DO NOT WRITE:**
+
+```sql
+WHERE city = NULL
+```
+
+✅ **WRITE:**
+
+```sql
+WHERE city IS NULL
+```
+
+### MongoDB mapping
+
+```javascript
+db.employees.find({
+  city: null
+})
+```
+
+---
+
+## `IS NOT NULL`
+
+> City ki value missing **nahi** honi chahiye.
+
+```sql
+SELECT name
+FROM employees
+WHERE city IS NOT NULL;
+```
+
+### MongoDB mapping
+
+```javascript
+db.employees.find({
+  city: {
+    $ne: null
+  }
+})
+```
+
+---
+
+## `NOT IN`
+
+`IN` ka opposite.
+
+```sql
+SELECT name
+FROM employees
+WHERE department NOT IN ('HR', 'IT');
+```
+
+> HR aur IT ko chhodkar baaki employees.
+
+### MongoDB mapping
+
+```javascript
+db.employees.find({
+  department: {
+    $nin: ["HR", "IT"]
+  }
+})
+```
+
+```text
+SQL   → NOT IN
+Mongo → $nin
+```
+
+---
+
+## `NOT LIKE`
+
+`LIKE` ka opposite.
+
+```sql
+SELECT name
+FROM employees
+WHERE name NOT LIKE 'R%';
+```
+
+> R se start hone wale names ko exclude karo.
+
+### MongoDB mapping
+
+```javascript
+db.employees.find({
+  name: {
+    $not: /^R/
+  }
+})
+```
+
+```text
+SQL   → NOT LIKE
+Mongo → $not + regex
+```
+
+---
+
 # Quick SQL + Mongo Mapping
 
 ```text
@@ -416,6 +542,10 @@ OR                          $or
 IN                          $in
 BETWEEN                     $gte + $lte
 LIKE                        Regex
+IS NULL                     field: null
+IS NOT NULL                 $ne: null
+NOT IN                      $nin
+NOT LIKE                    $not + regex
 ```
 
 ### Core mental model
@@ -427,4 +557,6 @@ SELECT → final result mein columns choose karo
 IN       → multiple exact values
 BETWEEN  → range
 LIKE     → text pattern
+NULL     → missing/unknown value
+NOT      → condition ka opposite
 ```

@@ -500,15 +500,87 @@ each object = one pipeline stage
 stage key → stage-specific value/config
 ```
 
-Examples:
+### ⭐ Pipeline Order Intuition + Stage Structure
 
-```javascript
-{ $match: { city: "Gurgaon" } }
-{ $sort: { salary: -1 } }
-{ $limit: 3 }
+Think about aggregation at **2 levels**:
+
+**LEVEL 1 — Pipeline flow:**
+
+```text
+$match
+  ↓
+$group
+  ↓
+$match
+  ↓
+$sort
+  ↓
+$limit
 ```
 
-`$group` usually has multiple output definitions:
+**LEVEL 2 — Inside each stage:**
+
+Each stage has its own structure. Do not memorize one universal inner syntax.
+
+```text
+$match
+  ↓
+field
+  ↓
+operator
+  ↓
+value
+```
+
+Example:
+
+```javascript
+{
+  $match: {
+    salary: {
+      $gt: 60000
+    }
+  }
+}
+```
+
+```text
+$match
+  ↓
+salary
+  ↓
+$gt
+  ↓
+60000
+```
+
+Multiple fields in `$match` mean implicit AND:
+
+```javascript
+{
+  $match: {
+    city: "Gurgaon",
+    department: "IT"
+  }
+}
+```
+
+Explicit `$and` / `$or` use an array of conditions:
+
+```javascript
+{
+  $match: {
+    $or: [
+      { city: "Gurgaon" },
+      { city: "Delhi" }
+    ]
+  }
+}
+```
+
+### Common stage shapes
+
+`$group` has a grouping key plus calculated/output fields:
 
 ```javascript
 {
@@ -520,9 +592,75 @@ Examples:
 ```
 
 ```text
-_id        → kis basis par group?
-avgSalary  → calculated output field ka naam
+$group
+ ├── _id → grouping key
+ └── avgSalary → output field
+                  ↓
+                $avg
+                  ↓
+             "$salary"
 ```
+
+`$sort`:
+
+```javascript
+{
+  $sort: {
+    salary: -1
+  }
+}
+```
+
+```text
+$sort
+  ↓
+field
+  ↓
+1 / -1
+```
+
+`$limit`:
+
+```javascript
+{
+  $limit: 3
+}
+```
+
+```text
+$limit
+  ↓
+number
+```
+
+### ⭐ Use the Structure, Don't Mug Up Syntax
+
+Whenever you get a Mongo aggregation question:
+
+```text
+1. Identify the PIPELINE stages.
+2. Put the stages in the correct ORDER.
+3. For each stage, identify its INTERNAL STRUCTURE.
+4. Fill field → operator → value / grouping key → accumulator / output.
+```
+
+Example thought process:
+
+```text
+Question:
+IT employees from Gurgaon → highest salary → top 3 → only name/salary
+
+Pipeline:
+$match → $sort → $limit → $project
+
+Inside stages:
+$match  → department/city conditions
+$sort   → salary: -1
+$limit  → 3
+$project → name: 1, salary: 1, _id: 0
+```
+
+> **Pipeline = stages ka sequence. Stage = apne purpose ke according specific structure.**
 
 `avgSalary` koi reserved keyword nahi hai; developer khud naam deta hai.
 

@@ -636,6 +636,169 @@ DESC      → -1
 
 ---
 
+# SQL — Aggregate Functions
+
+## Aggregate Functions
+
+Multiple rows → ek calculation/result.
+
+```text
+COUNT() → kitne?
+SUM()   → total?
+AVG()   → average?
+MAX()   → highest?
+MIN()   → lowest?
+```
+
+### COUNT
+
+```sql
+SELECT COUNT(* )
+FROM employees;
+```
+
+`COUNT(*)` → total rows.
+
+```sql
+SELECT COUNT(id)
+FROM employees;
+```
+
+`COUNT(id)` → `id` ki non-NULL values count.
+
+```text
+COUNT(*)       → all rows
+COUNT(column)  → non-NULL values in that column
+```
+
+### SUM
+
+```sql
+SELECT SUM(salary)
+FROM employees;
+```
+
+→ total salary.
+
+### AVG
+
+```sql
+SELECT AVG(salary)
+FROM employees;
+```
+
+→ average salary.
+
+### MAX
+
+```sql
+SELECT MAX(salary)
+FROM employees;
+```
+
+→ highest salary.
+
+### MIN
+
+```sql
+SELECT MIN(salary)
+FROM employees;
+```
+
+→ lowest salary.
+
+> `SUM/AVG/MAX/MIN` mainly numeric columns par meaningful hote hain (`salary`, `age`, etc.).
+
+---
+
+# 🔥 Mixed SQL Interview Practice
+
+Assume:
+
+```text
+employees
+--------------------------------
+id | name | department | salary | city
+```
+
+## Q1 — Top 3 IT/HR employees
+
+> Find the **top 3 highest-paid employees** who are from either **IT or HR** department and whose salary is **between 50,000 and 1,00,000**. Return `name`, `department`, `salary`.
+
+### Correct query
+
+```sql
+SELECT name, department, salary
+FROM employees
+WHERE department IN ('IT', 'HR')
+AND salary BETWEEN 50000 AND 100000
+ORDER BY salary DESC
+LIMIT 3;
+```
+
+### Your mistakes
+
+```text
+❌ IN(in,hr)            → IT/HR values + quotes
+❌ 2 WHERE              → second condition uses AND
+❌ ORDER BY ASC         → highest = DESC
+❌ ORDER BY without column → ORDER BY salary DESC
+```
+
+---
+
+## Q2 — Name contains `a`, not HR, top 5
+
+> Find `name` and `salary` of employees whose name contains `a`, who are **NOT from HR**, have salary above 60,000, and return only the **5 highest-paid** employees.
+
+### Correct query
+
+```sql
+SELECT name, salary
+FROM employees
+WHERE name LIKE '%a%'
+AND department != 'HR'
+AND salary > 60000
+ORDER BY salary DESC
+LIMIT 5;
+```
+
+### Your mistakes
+
+```text
+❌ name '%a%'          → name LIKE '%a%'
+❌ missing FROM        → FROM employees
+❌ IS NOT 'HR'         → != 'HR' for normal value comparison
+❌ DESC written as des → DESC
+```
+
+---
+
+## Q3 — Count IT employees above 70k
+
+> How many employees are from the IT department and have salary greater than 70,000?
+
+### Correct query
+
+```sql
+SELECT COUNT(*)
+FROM employees
+WHERE department = 'IT'
+AND salary > 70000;
+```
+
+### Your mistake
+
+```text
+❌ COUNT(salary) outside SELECT
+```
+
+`COUNT()` is an aggregate function, so it goes in `SELECT`.
+
+`COUNT(salary)` would also work if you specifically wanted to count non-NULL salaries; for counting matching employees, `COUNT(*)` is the clean default.
+
+---
+
 # Quick SQL + Mongo Mapping
 
 ```text
@@ -669,4 +832,10 @@ BETWEEN  → range
 LIKE     → text pattern
 NULL     → missing/unknown value
 NOT      → condition ka opposite
+
+COUNT → kitne?
+SUM   → total?
+AVG   → average?
+MAX   → highest?
+MIN   → lowest?
 ```

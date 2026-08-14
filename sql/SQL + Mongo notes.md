@@ -653,7 +653,7 @@ MIN()   → lowest?
 ### COUNT
 
 ```sql
-SELECT COUNT(* )
+SELECT COUNT(*)
 FROM employees;
 ```
 
@@ -708,6 +708,185 @@ FROM employees;
 → lowest salary.
 
 > `SUM/AVG/MAX/MIN` mainly numeric columns par meaningful hote hain (`salary`, `age`, etc.).
+
+---
+
+# SQL — GROUP BY & HAVING
+
+## GROUP BY = Same values ko groups mein jama karo
+
+Example:
+
+```text
+name   department   salary
+Rahul  IT            50000
+Aman   IT            70000
+Priya  HR            60000
+Rohit  HR            80000
+Neha   Sales         40000
+```
+
+```sql
+SELECT department, AVG(salary)
+FROM employees
+GROUP BY department;
+```
+
+Mental model:
+
+```text
+GROUP BY department
+        ↓
+IT group | HR group | Sales group
+        ↓
+AVG(salary) har group par
+```
+
+Result:
+
+```text
+department   avg_salary
+IT           60000
+HR           70000
+Sales        40000
+```
+
+> **GROUP BY khud calculation nahi karta.** Ye sirf rows ko groups mein todta hai. `COUNT/SUM/AVG/MAX/MIN` group ke andar calculation karte hain.
+
+### WHERE vs GROUP BY vs HAVING
+
+```text
+WHERE
+→ individual ROWS filter
+
+GROUP BY
+→ rows ko GROUPS mein todta hai
+
+HAVING
+→ GROUPS filter karta hai
+```
+
+Example:
+
+```sql
+SELECT department, AVG(salary)
+FROM employees
+GROUP BY department
+HAVING AVG(salary) > 60000;
+```
+
+→ pehle departments ke groups banao → average nikalo → sirf average > 60000 wale groups rakho.
+
+---
+
+# 🔥 SQL → MongoDB Aggregation Mental Mapping
+
+MongoDB Aggregation ko **SQL ka pipeline version** samjho.
+
+### Main Cheat Sheet
+
+```text
+SQL                         MongoDB Aggregation
+------------------------------------------------------
+FROM employees              → db.employees.aggregate([])
+WHERE condition             → $match
+GROUP BY department         → $group
+COUNT(*)                    → $count / $sum: 1
+SUM(salary)                 → $sum: "$salary"
+AVG(salary)                 → $avg: "$salary"
+MAX(salary)                 → $max: "$salary"
+MIN(salary)                 → $min: "$salary"
+HAVING condition            → $match AFTER $group
+SELECT columns              → $project
+ORDER BY salary ASC         → $sort: { salary: 1 }
+ORDER BY salary DESC        → $sort: { salary: -1 }
+LIMIT 5                     → $limit: 5
+```
+
+### 🔥 Killer Trick
+
+```text
+SQL WHERE       → Mongo $match
+SQL GROUP BY    → Mongo $group
+SQL HAVING      → Mongo $match AFTER $group
+```
+
+**Why two `$match` positions?**
+
+```text
+Before $group → individual documents filter
+After $group  → groups filter
+```
+
+So:
+
+```text
+WHERE  → $match BEFORE $group
+HAVING → $match AFTER $group
+```
+
+### Pipeline Order Intuition
+
+Mongo aggregation step-by-step chalti hai:
+
+```text
+$match
+  ↓
+$group
+  ↓
+$match
+  ↓
+$sort
+  ↓
+$limit
+```
+
+Example SQL:
+
+```sql
+SELECT department, AVG(salary) AS avgSalary
+FROM employees
+WHERE city = 'Gurgaon'
+GROUP BY department
+HAVING AVG(salary) > 70000
+ORDER BY avgSalary DESC
+LIMIT 3;
+```
+
+MongoDB:
+
+```javascript
+db.employees.aggregate([
+  {
+    $match: {
+      city: "Gurgaon"
+    }
+  },
+  {
+    $group: {
+      _id: "$department",
+      avgSalary: { $avg: "$salary" }
+    }
+  },
+  {
+    $match: {
+      avgSalary: { $gt: 70000 }
+    }
+  },
+  {
+    $sort: {
+      avgSalary: -1
+    }
+  },
+  {
+    $limit: 3
+  }
+])
+```
+
+### One-line memory
+
+> **SQL mein question ko clauses mein tod; Mongo mein same thought ko pipeline stages mein tod.**
 
 ---
 
@@ -817,6 +996,9 @@ NOT LIKE                    $not + regex
 ORDER BY ASC                .sort({ field: 1 })
 ORDER BY DESC               .sort({ field: -1 })
 LIMIT                       .limit()
+GROUP BY                    $group
+HAVING                      $match after $group
+COUNT / SUM / AVG / MAX / MIN  → aggregation accumulators
 ```
 
 ### Core mental model
@@ -826,6 +1008,8 @@ WHERE      → rows filter karo
 SELECT     → final result mein columns choose karo
 ORDER BY   → rows arrange karo
 LIMIT      → kitni rows chahiye
+GROUP BY   → same values ko groups mein jama karo
+HAVING     → groups filter karo
 
 IN       → multiple exact values
 BETWEEN  → range

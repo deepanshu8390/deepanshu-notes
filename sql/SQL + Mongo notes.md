@@ -531,6 +531,111 @@ Mongo → $not + regex
 
 ---
 
+# SQL — Sorting & Limiting
+
+## 6. ORDER BY = Sorting
+
+`WHERE` ke baad hum rows ko **arrange/sort** kar sakte hain.
+
+```sql
+SELECT name, salary
+FROM employees
+ORDER BY salary ASC;
+```
+
+- `ASC` → ascending → small → large
+- `DESC` → descending → large → small
+
+Example:
+
+```sql
+ORDER BY salary DESC;
+```
+
+→ highest salary pehle.
+
+### Mental model
+
+```text
+WHERE     → kaunsi rows?
+ORDER BY  → kis order mein?
+SELECT    → kaunse columns?
+```
+
+### MongoDB mapping
+
+```javascript
+// ASC
+.sort({ salary: 1 })
+
+// DESC
+.sort({ salary: -1 })
+```
+
+```text
+SQL ASC   → Mongo 1
+SQL DESC  → Mongo -1
+```
+
+---
+
+## 7. LIMIT = Kitni Rows?
+
+`LIMIT` result mein **kitni rows chahiye** ye control karta hai.
+
+```sql
+SELECT name, salary
+FROM employees
+LIMIT 3;
+```
+
+→ sirf 3 rows.
+
+### 🔥 Important Combo: ORDER BY + LIMIT
+
+Highest salary wale 3 employees:
+
+```sql
+SELECT name, salary
+FROM employees
+ORDER BY salary DESC
+LIMIT 3;
+```
+
+Flow:
+
+```text
+employees
+   ↓
+ORDER BY salary DESC
+   ↓
+highest salary first
+   ↓
+LIMIT 3
+   ↓
+top 3 employees
+```
+
+⚠️ `LIMIT` khud ranking nahi karta. Ye current order mein se first N rows deta hai. Top N chahiye toh usually `ORDER BY + LIMIT` use karo.
+
+### MongoDB mapping
+
+```javascript
+db.employees
+  .find()
+  .sort({ salary: -1 })
+  .limit(3)
+```
+
+```text
+SQL       → MongoDB
+LIMIT 3   → .limit(3)
+ASC       → 1
+DESC      → -1
+```
+
+---
+
 # Quick SQL + Mongo Mapping
 
 ```text
@@ -546,13 +651,18 @@ IS NULL                     field: null
 IS NOT NULL                 $ne: null
 NOT IN                      $nin
 NOT LIKE                    $not + regex
+ORDER BY ASC                .sort({ field: 1 })
+ORDER BY DESC               .sort({ field: -1 })
+LIMIT                       .limit()
 ```
 
 ### Core mental model
 
 ```text
-WHERE → rows filter karo
-SELECT → final result mein columns choose karo
+WHERE      → rows filter karo
+SELECT     → final result mein columns choose karo
+ORDER BY   → rows arrange karo
+LIMIT      → kitni rows chahiye
 
 IN       → multiple exact values
 BETWEEN  → range

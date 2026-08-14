@@ -349,37 +349,58 @@ db.employees.find({
 /^[0-9]/  → digit se start
 ```
 
-Mental model:
+### 🔥 Main Regex Trick
+
+SQL ke `%` ko Mongo regex mein mentally map karne ke liye:
 
 ```text
-^  → start of string
-$  → end of string
-.* → beech mein kuch bhi / zero or more characters
+^   → start
+$   → end
+.*  → beech mein kuch bhi / zero or more characters
 ```
 
-Examples:
+Isliye:
+
+```text
+SQL LIKE 'R%'   → /^R/
+SQL LIKE '%n'   → /n$/
+SQL LIKE '%a%'  → /a/
+SQL LIKE 'R%n'  → /^R.*n$/
+```
+
+Example: **R se start AND n pe end**:
 
 ```javascript
-// R se start
-{ name: /^R/ }
-
-// n pe end
-{ name: /n$/ }
-
-// name mein 'a' kahin bhi
-{ name: /a/ }
-
-// R se start aur n pe end
 { name: /^R.*n$/ }
 ```
 
-Common SQL → Mongo regex mapping:
+Isko tod:
 
 ```text
-SQL LIKE 'R%'   → /^R/      → R se start
-SQL LIKE '%n'   → /n$/      → n pe end
-SQL LIKE '%a%'  → /a/       → a contains
-SQL LIKE 'R%n'  → /^R.*n$/  → R se start, n pe end
+^R  → R se start
+.*  → beech mein kuch bhi
+n$  → n pe end
+```
+
+### More Regex Examples
+
+```javascript
+// R se start
+db.employees.find({ name: /^R/ })
+
+// n pe end
+db.employees.find({ name: /n$/ })
+
+// name mein 'a' kahin bhi
+db.employees.find({ name: /a/ })
+
+// R se start aur n pe end
+db.employees.find({ name: /^R.*n$/ })
+```
+
+```text
+SQL      → LIKE
+MongoDB  → Regex
 ```
 
 ---

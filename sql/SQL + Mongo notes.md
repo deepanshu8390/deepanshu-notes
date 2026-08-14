@@ -338,25 +338,48 @@ db.employees.find({
 })
 ```
 
-Common mapping:
+### MongoDB Regex Tricks — Quick Cheat Sheet
 
 ```text
-SQL LIKE 'R%'   → Mongo /^R/    → R se start
-SQL LIKE '%n'   → Mongo /n$/    → n pe end
-SQL LIKE '%a%'  → Mongo /a/     → a contains
+/^R/      → R se start
+/n$/      → n pe end
+/a/       → a kahin bhi contains
+/^R.*n$/  → R se start AND n pe end
+/^[A-Z]/  → capital letter se start
+/^[0-9]/  → digit se start
 ```
 
-R se start AND n pe end:
+Mental model:
+
+```text
+^  → start of string
+$  → end of string
+.* → beech mein kuch bhi / zero or more characters
+```
+
+Examples:
 
 ```javascript
-db.employees.find({
-  name: /^R.*n$/
-})
+// R se start
+{ name: /^R/ }
+
+// n pe end
+{ name: /n$/ }
+
+// name mein 'a' kahin bhi
+{ name: /a/ }
+
+// R se start aur n pe end
+{ name: /^R.*n$/ }
 ```
 
+Common SQL → Mongo regex mapping:
+
 ```text
-SQL      → LIKE
-MongoDB  → Regex
+SQL LIKE 'R%'   → /^R/      → R se start
+SQL LIKE '%n'   → /n$/      → n pe end
+SQL LIKE '%a%'  → /a/       → a contains
+SQL LIKE 'R%n'  → /^R.*n$/  → R se start, n pe end
 ```
 
 ---
